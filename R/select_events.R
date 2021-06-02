@@ -10,6 +10,8 @@
 #' If an element is wrapped in a `.()`, the element is expanded.
 #' Dates should be entered as strings in ISO format (%Y-%m-%d)
 #' 
+#' @importFrom sqldf sqldf
+#' @importFrom dbplyr translate_sql_
 #' @export
 #' 
 #' @param db a database connection
@@ -35,8 +37,8 @@ select_events <- function(db = NULL, tab, columns = "*", where = NULL,
     assert_that(is.character(tab) && length(tab) == 1)
     columns <- paste(columns, collapse = ", ")
     if(is.character(where)){
-        where_clause <- translate_sql_(expand_string(where))
-        sql_query <- paste("SELECT", columns, "FROM", tab, "WHERE", where_clause)
+        #where_clause <- dbplyr::translate_sql_(expand_string(where))
+        sql_query <- paste("SELECT", columns, "FROM", tab, "WHERE", expand_string(where))
     } else sql_query <- paste("SELECT", columns, "FROM", tab)
     if(sql_only){
         sql_query
@@ -44,7 +46,7 @@ select_events <- function(db = NULL, tab, columns = "*", where = NULL,
         assert_that(class(db) == "SQLiteConnection")
         if(convert_dates){
             convert_dates(sqldf(sql_query, connection = db))
-        } else sqldf(sql_query, connection = db)
+        } else sqldf::sqldf(sql_query, connection = db)
     }
 }
 

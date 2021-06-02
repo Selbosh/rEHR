@@ -7,7 +7,7 @@ Authors@R: c(person(given = "David", family = "Springate", role = "aut",
               email = "E.Kontopantelis@manchester.ac.uk"),
               person(given = "Ivan", family = "Olier", role = c("ctb"), 
               email = "i.olier@keele.ac.uk"))
-Version: 1.0
+Version: 1.0.0.9000
 License: GPL (>= 2)
 Title: Manipulating and Analysing Electronic Health Record Data
 Description: Tools for processing and extracting clinical information from
