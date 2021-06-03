@@ -19,7 +19,7 @@
 #'                                         sql_only = TRUE))
 #' }
 temp_table <- function(db, tab_name, select_query){
-    dbGetQuery(db, paste("CREATE TEMP TABLE", tab_name, "AS", select_query, ";"))
+    dbExecute(db, paste("CREATE TEMP TABLE", tab_name, "AS", select_query, ";"))
     message(sprintf("Temporary table '%s' created", tab_name))
 }
 
