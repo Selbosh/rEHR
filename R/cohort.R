@@ -5,6 +5,8 @@
 #' added for membership of the case group.   All patients
 #' with start date > end date are removed from the dataset.
 #' 
+#' @importFrom rlang parse_expr sym
+#' 
 #' @export
 #' 
 #' @param dat dataframe as output from a call to \code{prev_terms}
@@ -27,26 +29,35 @@ build_cohort <- function(dat, cohort_type = c("incid", "prev"), cohort_start,
     } else {
         start_criteria <- intersect(.ehr$cohort$start_criteria, names(dat))
     }
-    start_q <- paste0("as.Date(pmax(as.Date('", 
-                      cohort_start, "'), ", 
-                      paste(start_criteria, 
-                            collapse = ", ", sep = ","), ", na.rm = TRUE), origin = '1970-01-01')",
-                      collapse = ",")
-    end_q <- paste0("as.Date(pmin(as.Date('", 
-                    cohort_end, "'), ", 
-                    paste(end_criteria, 
-                          collapse = ", ", sep = ","), ", na.rm = TRUE), origin = '1970-01-01')", 
-                    collapse = ",")
+    start_q <- rlang::parse_expr(
+        paste0("as.Date(pmax(as.Date('", 
+               cohort_start, "'), ", 
+               paste(start_criteria, 
+                     collapse = ", ", sep = ","), ", na.rm = TRUE), origin = '1970-01-01')",
+               collapse = ",")
+    )
+    end_q <- rlang::parse_expr(
+        paste0("as.Date(pmin(as.Date('", 
+               cohort_end, "'), ", 
+               paste(end_criteria, 
+                     collapse = ", ", sep = ","), ", na.rm = TRUE), origin = '1970-01-01')", 
+               collapse = ",")
+    )
+    
+    filter_expr <- rlang::parse_expr(cohort_filter)
+    patient_id_sym <- rlang::sym(.ehr$patient_id)
+    cohort_type_num <- rlang::sym(paste0(cohort_type, '_num'))
+    
      dat %>% 
-        filter_(cohort_filter) %>% 
-        arrange_(.ehr$patient_id, "desc(year)") %>% 
-        distinct_(.ehr$patient_id, .keep_all = TRUE)  %>%
-        mutate_(start_date = start_q,
-                end_date = end_q,
-                start = paste0("as.integer(start_date - as.Date('", cohort_start, "'))"),
-                end = paste0("as.integer(end_date - as.Date('", cohort_start, "'))"),
-                case = sprintf("ifelse(%s_num, 1, 0)", cohort_type)) %>%
-        filter(start < end) 
+        filter(!! filter_expr) %>% 
+        arrange(!! patient_id_sym, desc(year)) %>% 
+        distinct(!! patient_id_sym, .keep_all = TRUE)  %>%
+        mutate(start_date = !! start_q,
+               end_date = !! end_q,
+               start = as.integer(start_date - cohort_start),
+               end = as.integer(end_date - cohort_start),
+               case = ifelse(!! cohort_type_num, 1, 0)) %>%
+        filter(start < end)
         
                 
 }
