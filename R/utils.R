@@ -94,7 +94,9 @@ wrap_sql_query <- function(query, ...){
     assert_that(length(items) == max_locations)
     items_dict <- list()
     for(l in 1:length(locations)){
-        items_dict[[locations[l]]] <- items[[as.integer(str_extract(locations[l], "[0-9]+"))]]
+        items_dict[[locations[l]]] <- as.character(
+            items[[as.integer(str_extract(locations[l], "[0-9]+"))]]
+        )
     }
     for(n in names(items_dict)){
         query <- str_replace_all(query, n, items_dict[[n]])
