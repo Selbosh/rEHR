@@ -79,6 +79,7 @@ select_by_year <- function(dbname = NULL, db = NULL, tables, columns = "*", wher
                 out <- selector_fn(db = db, 
                                    tab = tab, columns = columns, where = where_year, 
                                    sql_only = FALSE, ...)
+                out <- out[, unique(colnames(out)), drop = FALSE] # remove duplicate columns
                 if(nrow(out)){
                     out$table <- tab    
                 } else out <- NULL
